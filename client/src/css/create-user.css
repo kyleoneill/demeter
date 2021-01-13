@@ -1,0 +1,9 @@
+.create-account-page {
+    margin: 1rem auto;
+    padding: 0 3rem 0 3rem;
+    max-width: 375px;
+}
+
+.create-account-page .field {
+    margin: 1rem;
+}

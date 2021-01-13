@@ -1,0 +1,56 @@
+:root {
+  --dark-color-background: #282c34;
+  --light-color-background: white;
+  --current-background: var(--light-color-background);
+}
+
+.App {
+  display: block;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.App-header {
+  background-color: var(--current-background);
+  margin-top: 2vh;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: calc(10px + 2vmin);
+  color: black;
+}
+
+.App-header * {
+  display: inline;
+}
+
+.header-account-manager {
+  cursor: pointer;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+/* Top Navigation Bar */
+.App .header-nav-bar {
+  background-color: var(--current-background);
+  overflow: hidden;
+  text-align: center;
+}
+.App .header-nav-bar > ul > li {
+  display: inline;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 3vh;
+}
+.App .header-nav-bar > ul {
+  padding-left: 0px;
+}
+.App .header-nav-bar > ul > li > a {
+  text-decoration: none;
+  color: black;
+  padding-left: 1.5vw;
+}

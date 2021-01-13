@@ -1,0 +1,24 @@
+.modal-footer {
+    margin-bottom: 10px;
+}
+
+.modal-footer p {
+    display: inline;
+    text-align: center;
+    text-decoration: none;
+}
+
+.form-switch {
+    cursor: pointer;
+    color: blue;
+}
+
+.login-page {
+    margin: 1rem auto;
+    padding: 0 3rem 0 3rem;
+    max-width: 450px;
+}
+
+.login-page .field {
+    margin: 1rem;
+}

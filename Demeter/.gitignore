@@ -1,0 +1,5 @@
+.env
+target
+cargo.lock
+*.sqlite
+Rocket.toml
