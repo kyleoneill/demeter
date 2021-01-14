@@ -32,7 +32,8 @@ fn main() {
             .mount("/", routes![index, hello])
             .mount("/api", routes![
                 controllers::users::create,
-                controllers::users::authenticate
+                controllers::users::authenticate,
+                controllers::users::check_token
             ])
             .launch();
         }

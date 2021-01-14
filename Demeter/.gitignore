@@ -1,5 +1,6 @@
 .env
 target
 cargo.lock
+Cargo.lock
 *.sqlite
 Rocket.toml

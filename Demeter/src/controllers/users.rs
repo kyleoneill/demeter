@@ -2,7 +2,7 @@ use chrono::prelude::*;
 
 use std::str;
 
-use rocket::post;
+use rocket::{post, get};
 use rocket_contrib::json::Json;
 use base64::encode;
 use rand::Rng;
@@ -12,6 +12,7 @@ use serde::Deserialize;
 use crate::{
     db,
     error::Error,
+    controllers
 };
 
 #[derive(Deserialize)]
@@ -78,6 +79,31 @@ pub fn authenticate(conn: db::Database, request_user: Json<User>) -> Result<Stri
             else {
                 Err(Error::BadCredentials)
             }
+        }
+        Err(_e) => {
+            Err(Error::NotFound)
+        }
+    }
+}
+
+#[get("/users/check_token?<username>&<request_token>",)]
+pub fn check_token(conn: db::Database, username: String, request_token: String) -> Result<Json<bool>, Error> {
+    let username = username.as_str();
+    let request_token = request_token.as_str();
+    match verify_token(&conn, username, request_token) {
+        Ok(token_valid) => {
+            Ok(Json(token_valid))
+        }
+        Err(_e) => {
+            Err(Error::GenericError)
+        }
+    }
+}
+
+pub fn verify_token(conn: &db::Database, username: &str, request_token: &str) -> Result<bool, Error> {
+    match db::get_token(&conn, username) {
+        Ok(token) => {
+            Ok(token.token_uuid.eq(request_token) && !controllers::tokens::token_expired(&token.expiration))
         }
         Err(_e) => {
             Err(Error::NotFound)
