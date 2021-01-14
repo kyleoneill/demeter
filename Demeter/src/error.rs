@@ -18,8 +18,10 @@ impl <'r> Responder<'r> for Error {
         Ok(
             Response::build().status(
                 match self {
-                    Error::ResourceAlreadyExists => Status::ImUsed,
-                    _ => Status::InternalServerError
+                    Error::ResourceAlreadyExists => Status::ImUsed, //226
+                    Error::BadCredentials => Status::NotAcceptable, //406
+                    Error::NotFound => Status::NotFound, //404
+                    _ => Status::InternalServerError //500
                 }
             )
             .header(ContentType::Plain)

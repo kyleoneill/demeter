@@ -7,13 +7,19 @@ use rocket_contrib::json::Json;
 use base64::encode;
 use rand::Rng;
 use sha2::{Sha256, Digest};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     db,
     error::Error,
     controllers
 };
+
+#[derive(Serialize)]
+pub struct AuthResponse {
+    message: String,
+    token: String
+}
 
 #[derive(Deserialize)]
 pub struct User<'a> {
@@ -43,7 +49,7 @@ fn hash_password(password: &str, salt: &str) -> String {
 }
 
 #[post("/users/create", data = "<new_user>")]
-pub fn create(conn: db::Database, mut new_user: Json<User>) -> Result<String, Error> {
+pub fn create(conn: db::Database, mut new_user: Json<User>) -> Result<Json<AuthResponse>, Error> {
     new_user.trim();
     let salt = generate_salt();
     let hashed_password = hash_password(new_user.password, &salt);
@@ -56,32 +62,31 @@ pub fn create(conn: db::Database, mut new_user: Json<User>) -> Result<String, Er
             created_at: &Utc::now().timestamp()
         }) {
         Ok(_val) => {
-            Ok(format!("Created account with username {}", new_user.username))
+            let message = format!("Created account with username {}", new_user.username);
+            let token = db::create_token(&conn, new_user.username).unwrap();
+            Ok(Json(AuthResponse{message, token}))
         }
-        Err(Error::ResourceAlreadyExists) => {
-            Err(Error::ResourceAlreadyExists)
-        }
-        Err(_e) => {
-            Err(Error::GenericError)
+        Err(e) => {
+            Err(e)
         }
     }
 }
 
 #[post("/users/authenticate", data = "<request_user>")]
-pub fn authenticate(conn: db::Database, request_user: Json<User>) -> Result<String, Error> {
+pub fn authenticate(conn: db::Database, request_user: Json<User>) -> Result<Json<AuthResponse>, Error> {
     match db::get_user(&conn, &request_user.username) {
         Ok(user) => {
             let hashed_password = hash_password(request_user.password, &user.salt);
             if hashed_password == user.hashed_password {
                 let token = db::create_token(&conn, &user.username).expect("Failed to generate new token");
-                Ok(token)
+                Ok(Json(AuthResponse{message: "Authentication successful".to_string(), token}))
             }
             else {
                 Err(Error::BadCredentials)
             }
         }
-        Err(_e) => {
-            Err(Error::NotFound)
+        Err(e) => {
+            Err(e)
         }
     }
 }
@@ -94,8 +99,8 @@ pub fn check_token(conn: db::Database, username: String, request_token: String) 
         Ok(token_valid) => {
             Ok(Json(token_valid))
         }
-        Err(_e) => {
-            Err(Error::GenericError)
+        Err(e) => {
+            Err(e)
         }
     }
 }
@@ -105,8 +110,8 @@ pub fn verify_token(conn: &db::Database, username: &str, request_token: &str) ->
         Ok(token) => {
             Ok(token.token_uuid.eq(request_token) && !controllers::tokens::token_expired(&token.expiration))
         }
-        Err(_e) => {
-            Err(Error::NotFound)
+        Err(e) => {
+            Err(e)
         }
     }
 }

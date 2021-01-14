@@ -3,9 +3,11 @@ import {
     Modal,
     Button,
     Form,
-    Input
+    Input,
+    Label
 } from 'semantic-ui-react';
 import '../css/login.css';
+import {createUser, login} from '../api';
 
 class LoginModal extends React.Component {
     state = {
@@ -13,21 +15,24 @@ class LoginModal extends React.Component {
         modalName: "Login",
         username: "",
         password: "",
-        passwordConfirm: ""
+        passwordConfirm: "",
+        errorText: ""
     };
     handleOpen = () => this.setState({
         modalOpen: true,
         modalName: "Login",
         username: "",
         password: "",
-        passwordConfirm: ""
+        passwordConfirm: "",
+        errorText: ""
     });
     handleClose = () => this.setState({
         modalOpen: false,
         modalName: "Login",
         username: "",
         password: "",
-        passwordConfirm: ""
+        passwordConfirm: "",
+        errorText: ""
     });
     handleSwitch = () => {
         if(this.state.modalName === "Login") {
@@ -35,7 +40,8 @@ class LoginModal extends React.Component {
                 modalName: "Create Account",
                 username: "",
                 password: "",
-                passwordConfirm: ""
+                passwordConfirm: "",
+                errorText: ""
             });
         }
         else {
@@ -43,7 +49,8 @@ class LoginModal extends React.Component {
                 modalName: "Login",
                 username: "",
                 password: "",
-                passwordConfirm: ""
+                passwordConfirm: "",
+                errorText: ""
             });
         }
     };
@@ -56,21 +63,48 @@ class LoginModal extends React.Component {
     handlePasswordConfirmChange = (e) => {
         this.setState({passwordConfirm: e.target.value})
     };
-    handleLoginSubmit = (e) => {
+    handleSubmit = (e) => {
         e.preventDefault();
         if(this.state.modalName === "Login") {
             if(this.state.username !== "" && this.state.password !== "") {
-                this.props.handleLogin(this.state.username, this.state.password);
-                return true;
+                login(this.state.username, this.state.password).then((res) => {
+                    let user = this.state.username;
+                    this.handleClose();
+                    this.props.handleLogin(user, res.data.token);
+                }).catch((e) => {
+                    let errorMessage = "Login failed"
+                    if(e.message.includes("404")) {
+                        errorMessage = "Username not found";
+                    }
+                    else if(e.message.includes("406")) {
+                        errorMessage = "Incorrect password";
+                    }
+                    this.setState({errorText: errorMessage});
+                })
             }
-            return false;
         }
         else {
             if(this.state.username !== "" && this.state.password !== "" && this.state.passwordConfirm !== "" && this.state.password === this.state.passwordConfirm) {
-                this.props.handleCreateAccount(this.state.username, this.state.password);
-                return true;
+                if(this.state.password.length >= 8) {
+                    createUser(this.state.username, this.state.password).then((res) => {
+                        let user = this.state.username;
+                        this.handleClose();
+                        this.props.handleLogin(user, res.data.token);
+                    }).catch((e) => {
+                        let errorMessage = "Failed to create new user";
+                        if(e.message.includes("226")) {
+                            errorMessage = "Username is already taken";
+                        }
+                        this.setState({errorText: errorMessage});
+                    });
+                }
+                else {
+                    this.setState({errorText: "Password must be at least 8 characters"});
+                }
             }
-            return false;
+            else {
+                this.setState({errorText: "Each field must be set and passwords must match"});
+            }
         }
     };
     render() {
@@ -86,8 +120,7 @@ class LoginModal extends React.Component {
                     <Modal.Header>{this.state.modalName}</Modal.Header>
                     <Modal.Content>
                         <Form onSubmit={(e) => {
-                            let res = this.handleLoginSubmit(e);
-                            if(res) {this.handleClose()};
+                            this.handleSubmit(e);
                         }}>
                             <Form.Field>
                                 <label>Username</label>
@@ -116,6 +149,11 @@ class LoginModal extends React.Component {
                                         value={this.state.passwordConfirm}
                                     />
                                 </Form.Field>
+                            }
+                            {this.state.errorText !== "" &&
+                            <Form.Field>
+                                <Label basic color="red">{this.state.errorText}</Label>
+                            </Form.Field>
                             }
                             <Button>{this.state.modalName}</Button>
                         </Form>
