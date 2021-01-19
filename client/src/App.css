@@ -26,32 +26,30 @@
   display: inline;
 }
 
-.header-account-manager {
-  cursor: pointer;
-}
-
 .App-link {
   color: #61dafb;
 }
 
 /* Top Navigation Bar */
-.App .header-nav-bar {
+.header-nav-bar {
   background-color: var(--current-background);
   overflow: hidden;
   text-align: center;
 }
-.App .header-nav-bar > ul > li {
+
+.header-nav-bar li {
   display: inline;
   text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
   font-size: 3vh;
 }
-.App .header-nav-bar > ul {
-  padding-left: 0px;
-}
-.App .header-nav-bar > ul > li > a {
+
+.header-nav-bar a {
   text-decoration: none;
   color: black;
   padding-left: 1.5vw;
+}
+
+.header-nav-bar li:hover,
+.header-nav-bar a.selected{
+  text-decoration: underline;
 }

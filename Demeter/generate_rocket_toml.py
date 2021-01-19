@@ -44,10 +44,12 @@ def generate_production(handler):
 def main():
     file_name = "Rocket.toml"
     key = generate_key(32)
-    db_path = "src/demeterDB.sqlite"
+
+    db_path = "./demeterDB.sqlite"
     port = 9000
-    handler = open(file_name, "w", encoding='utf-8')
     address = "127.0.0.1"
+    
+    handler = open(file_name, "w", encoding='utf-8')
     generate_global(handler, db_path, port, key, address)
     generate_development(handler)
     generate_staging(handler)
