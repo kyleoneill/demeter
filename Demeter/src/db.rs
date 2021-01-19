@@ -68,22 +68,10 @@ pub fn create_token(conn: &SqliteConnection, username: &str) -> Result<String, E
     use schema::tokens;
     let user = get_user(conn, username).expect("Failed to find user");
     diesel::delete(tokens::table.filter(tokens::user_id.eq(user.user_id.unwrap()))).execute(conn).expect("Error deleting old token");
-    let token_uuid = controllers::tokens::generate_token();
-    let new_token = models::tokens::NewToken {
-        token_uuid: &token_uuid,
-        user_id: &user.user_id.unwrap(),
-        expiration: &controllers::tokens::get_unix_expiration_date(10)
-    };
+    let new_token = controllers::tokens::create_new_token(user.user_id.unwrap());
     let _res = diesel::insert_into(tokens::table)
-        .values(new_token)
+        .values(&new_token)
         .execute(conn)
         .expect("Failed to save new token");
-    Ok(token_uuid)
-}
-
-pub fn is_token_valid(conn: &SqliteConnection, token_uuid: &str, username: &str) -> Result<bool, Error> {
-    let token = get_token(conn, username).expect("Failed to load token");
-    Ok(
-        token.token_uuid.eq(token_uuid) && !controllers::tokens::token_expired(&token.expiration)
-    )
+    Ok(new_token.token_uuid)
 }

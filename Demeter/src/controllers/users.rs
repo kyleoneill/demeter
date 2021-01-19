@@ -108,7 +108,7 @@ pub fn check_token(conn: db::Database, username: String, request_token: String) 
 pub fn verify_token(conn: &db::Database, username: &str, request_token: &str) -> Result<bool, Error> {
     match db::get_token(&conn, username) {
         Ok(token) => {
-            Ok(token.token_uuid.eq(request_token) && !controllers::tokens::token_expired(&token.expiration))
+            Ok(controllers::tokens::is_token_valid(&token, request_token))
         }
         Err(e) => {
             Err(e)
