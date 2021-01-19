@@ -1,7 +1,11 @@
 :root {
-  --dark-color-background: #282c34;
-  --light-color-background: white;
-  --current-background: var(--light-color-background);
+  --dark-color-background: #222;
+  --light-color-background: #e8e8e8;
+  --current-background: var(--dark-color-background);
+}
+
+a {
+  outline: 0;
 }
 
 .App {
@@ -13,13 +17,12 @@
 
 .App-header {
   background-color: var(--current-background);
-  margin-top: 2vh;
+  padding: 2vh 1vw 1vh 1vw;
   display: flex;
   flex-direction: row;
   align-items: baseline;
   justify-content: space-between;
   font-size: calc(10px + 2vmin);
-  color: black;
 }
 
 .App-header * {
@@ -45,7 +48,6 @@
 
 .header-nav-bar a {
   text-decoration: none;
-  color: black;
   padding-left: 1.5vw;
 }
 

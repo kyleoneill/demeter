@@ -1,5 +1,5 @@
-//import './semantic.cyborg.min.css';
-import 'semantic-ui-css/semantic.min.css'
+import './semantic.darkly.min.css';
+//import 'semantic-ui-css/semantic.min.css'
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
