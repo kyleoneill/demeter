@@ -28,8 +28,17 @@ namespace Demeter.Models
         {
             dbClient = new MongoClient(connectionString);
             database = dbClient.GetDatabase("demeter");
+            if (database.GetCollection<BsonDocument>("recipes") == null)
+            {
+                database.CreateCollection("recipes");
+            }
+            if (database.GetCollection<BsonDocument>("users") == null)
+            {
+                database.CreateCollection("users");
+            }
         }
 
+        // Recipe
         public static DbResult InsertRecipe(Recipe recipe)
         {
             var checkIfRecipeExists = GetRecipeBySlug(recipe.Slug);
@@ -109,6 +118,67 @@ namespace Demeter.Models
             if (!deleteResult.IsAcknowledged)
                 return DbResult.DatabaseError;
             else if (deleteResult.DeletedCount == 0)
+                return DbResult.ResourceNotFound;
+            else
+                return DbResult.OperationAccepted;
+        }
+
+
+        // User
+        public static DbResult InsertUser(User user)
+        {
+            var checkIfUserExists = GetUserByUsername(user.Username);
+            if (checkIfUserExists == null)
+            {
+                var collection = database.GetCollection<BsonDocument>("users");
+                var serializedUser = user.ToBsonDocument();
+                collection.InsertOne(serializedUser);
+                return DbResult.OperationAccepted;
+            }
+            else
+            {
+                return DbResult.ResourceAlreadyExists;
+            }
+        }
+
+        public static User GetUserByUsername(string username)
+        {
+            var collection = database.GetCollection<BsonDocument>("users");
+            var filter = Builders<BsonDocument>.Filter.Eq("Username", username);
+            var document = collection.Find(filter).FirstOrDefault();
+            if (document != null)
+            {
+                User user = BsonSerializer.Deserialize<User>(document);
+                return user;
+            }
+            return null;
+        }
+
+        public static DbResult DeleteUser(string username)
+        {
+            var collection = database.GetCollection<BsonDocument>("users");
+            var deleteFilter = Builders<BsonDocument>.Filter.Eq("Username", username);
+            var deleteResult = collection.DeleteOne(deleteFilter);
+            if (!deleteResult.IsAcknowledged)
+                return DbResult.DatabaseError;
+            else if (deleteResult.DeletedCount == 0)
+                return DbResult.ResourceNotFound;
+            else
+                return DbResult.OperationAccepted;
+        }
+
+        public static DbResult ChangePassword(string username, string newPassword, string newSalt)
+        {
+            var collection = database.GetCollection<BsonDocument>("users");
+            var filter = Builders<BsonDocument>.Filter.Eq("Username", username);
+            var update = Builders<BsonDocument>.Update;
+            var updates = new List<UpdateDefinition<BsonDocument>>();
+            updates.Add(update.Set("Password", newPassword));
+            updates.Add(update.Set("Salt", newSalt));
+            var res = collection.UpdateOne(filter, update.Combine(updates));
+            if (!res.IsAcknowledged)
+                return DbResult.DatabaseError;
+            else if (res.MatchedCount == 0)
                 return DbResult.ResourceNotFound;
             else
                 return DbResult.OperationAccepted;

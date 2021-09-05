@@ -13,9 +13,9 @@ namespace Demeter.Controllers
     [Route("[controller]")]
     public class RecipeController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<RecipeController> _logger;
 
-        public RecipeController(ILogger<WeatherForecastController> logger)
+        public RecipeController(ILogger<RecipeController> logger)
         {
             _logger = logger;
         }
@@ -70,15 +70,15 @@ namespace Demeter.Controllers
         }
 
         [HttpDelete]
-        public IActionResult Delete([FromQuery(Name = "slug")] string slug)
+        public IActionResult Delete([FromQuery(Name = "slug")] string recipeSlug)
         {
-            if (slug == null)
-                return BadRequest("Query parameter 'slug' is required.");
-            var result = Database.DeleteRecipe(slug);
+            if (recipeSlug == null)
+                return BadRequest("query parameter 'slug' is required.");
+            var result = Database.DeleteRecipe(recipeSlug);
             return result switch
             {
                 DbResult.OperationAccepted => Ok(),
-                DbResult.ResourceNotFound => NotFound($"A recipe with slug '{slug}' does not exist."),
+                DbResult.ResourceNotFound => NotFound($"A recipe with slug '{recipeSlug}' does not exist."),
                 _ => StatusCode(500)
             };
         }

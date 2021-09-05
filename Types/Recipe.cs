@@ -14,8 +14,8 @@ namespace Demeter.Types
         public int? PreparationTime { get; set; }
         public int? Servings { get; set; }
         public IEnumerable<Ingredient> Ingredients { get; set; }
-        public string Preparation { get; set; }
-        public string Instructions { get; set; }
+        public List<string> Preparation { get; set; }
+        public List<string> Instructions { get; set; }
         public RecipeType RecipeType { get; set; }
         public string AuthorID { get; set; }
     }
