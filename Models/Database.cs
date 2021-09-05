@@ -29,13 +29,9 @@ namespace Demeter.Models
             dbClient = new MongoClient(connectionString);
             database = dbClient.GetDatabase("demeter");
             if (database.GetCollection<BsonDocument>("recipes") == null)
-            {
                 database.CreateCollection("recipes");
-            }
             if (database.GetCollection<BsonDocument>("users") == null)
-            {
                 database.CreateCollection("users");
-            }
         }
 
         // Recipe
@@ -136,9 +132,7 @@ namespace Demeter.Models
                 return DbResult.OperationAccepted;
             }
             else
-            {
                 return DbResult.ResourceAlreadyExists;
-            }
         }
 
         public static User GetUserByUsername(string username)

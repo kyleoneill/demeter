@@ -27,8 +27,8 @@ namespace Demeter.Controllers
 
         private static bool VerifyPassword(string password, string salt, string inputPassword)
         {
-            var hashedInput = salt + inputPassword;
-            return BCrypt.Net.BCrypt.Verify(hashedInput, password);
+            var saltedInput = salt + inputPassword;
+            return BCrypt.Net.BCrypt.Verify(saltedInput, password);
         }
 
         [HttpGet]
@@ -90,14 +90,10 @@ namespace Demeter.Controllers
         public IActionResult UpdatePassword(RequestUser requestUser, [FromQuery(Name = "new-password")] string newPassword)
         {
             if (newPassword == null)
-            {
                 return BadRequest("Query parameter 'new-password' is required.");
-            }
             User user = Database.GetUserByUsername(requestUser.username);
             if (user == null)
-            {
                 return Unauthorized("Username or password is incorrect.");
-            }
             bool passwordVerified = VerifyPassword(user.Password, user.Salt, requestUser.password);
             if (passwordVerified)
             {

@@ -73,7 +73,7 @@ namespace Demeter.Controllers
         public IActionResult Delete([FromQuery(Name = "slug")] string recipeSlug)
         {
             if (recipeSlug == null)
-                return BadRequest("query parameter 'slug' is required.");
+                return BadRequest("Query parameter 'slug' is required.");
             var result = Database.DeleteRecipe(recipeSlug);
             return result switch
             {
