@@ -15,7 +15,7 @@ namespace Demeter.Models
         ResourceAlreadyExists,
         ResourceNotFound,
         DatabaseError,
-        ResourceAccepted
+        OperationAccepted
     }
 
     public static class Database
@@ -38,7 +38,7 @@ namespace Demeter.Models
                 var collection = database.GetCollection<BsonDocument>("recipes");
                 var serializedRecipe = recipe.ToBsonDocument();
                 collection.InsertOne(serializedRecipe);
-                return DbResult.ResourceAccepted;
+                return DbResult.OperationAccepted;
             }
             else
             {
@@ -72,6 +72,46 @@ namespace Demeter.Models
                 }
             );
             return recipes;
+        }
+
+        public static DbResult UpdateRecipe(Recipe recipe)
+        {
+            var collection = database.GetCollection<BsonDocument>("recipes");
+            var filter = Builders<BsonDocument>.Filter.Eq("Slug", recipe.Slug);
+            var update = Builders<BsonDocument>.Update;
+            var updates = new List<UpdateDefinition<BsonDocument>>();
+            updates.Add(update.Set("Name", recipe.Name));
+            if (recipe.PreparationTime.HasValue)
+                updates.Add(update.Set("PreparationTime", recipe.PreparationTime.Value));
+            else
+                updates.Add(update.Unset("PreparationTime"));
+            if (recipe.Servings.HasValue)
+                updates.Add(update.Set("Servings", recipe.Servings.Value));
+            else
+                updates.Add(update.Unset("Servings"));
+            updates.Add(update.Set("Ingredients", recipe.Ingredients));
+            updates.Add(update.Set("Preparation", recipe.Preparation));
+            updates.Add(update.Set("Instructions", recipe.Instructions));
+            updates.Add(update.Set("RecipeType", recipe.RecipeType));
+            var updateResult = collection.UpdateOne(filter, update.Combine(updates));
+            if (!updateResult.IsAcknowledged)
+                return DbResult.DatabaseError;
+            else if (updateResult.MatchedCount == 0)
+                return DbResult.ResourceNotFound;
+            else return DbResult.OperationAccepted;
+        }
+
+        public static DbResult DeleteRecipe(string recipeSlug)
+        {
+            var collection = database.GetCollection<BsonDocument>("recipes");
+            var deleteFilter = Builders<BsonDocument>.Filter.Eq("Slug", recipeSlug);
+            var deleteResult = collection.DeleteOne(deleteFilter);
+            if (!deleteResult.IsAcknowledged)
+                return DbResult.DatabaseError;
+            else if (deleteResult.DeletedCount == 0)
+                return DbResult.ResourceNotFound;
+            else
+                return DbResult.OperationAccepted;
         }
     }
 }

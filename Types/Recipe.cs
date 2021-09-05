@@ -9,7 +9,6 @@ namespace Demeter.Types
     [BsonIgnoreExtraElements]
     public class Recipe
     {
-        public string ID { get; set; }
         public string Slug { get; set; }
         public string Name { get; set; }
         public int? PreparationTime { get; set; }
